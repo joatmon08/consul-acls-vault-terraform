@@ -10,7 +10,6 @@ terraform {
       version = "~> 2.12.2"
     }
   }
-  backend "remote" {}
 }
 
 provider "consul" {

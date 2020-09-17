@@ -1,0 +1,131 @@
+terraform_version = "0.13.1"
+
+resources = {
+  consul_acl_policy.app_key_read = {
+    "address": "consul_acl_policy.app_key_read",
+    "mode": "managed",
+    "type": "consul_acl_policy",
+    "name": "app_key_read",
+    "provider_name": "registry.terraform.io/hashicorp/consul",
+    "schema_version": 0,
+    "values": {
+      "datacenters": [],
+      "description": "",
+      "id": "b268b90f-e1b1-bf7b-f5d5-dce438783132",
+      "name": "key-read",
+      "namespace": null,
+      "rules": "key_prefix \"app/\" {\n  policy = \"list\"\n}\n"
+    }
+  },
+  consul_acl_policy.intentions_read = {
+    "address": "consul_acl_policy.intentions_read",
+    "mode": "managed",
+    "type": "consul_acl_policy",
+    "name": "intentions_read",
+    "provider_name": "registry.terraform.io/hashicorp/consul",
+    "schema_version": 0,
+    "values": {
+      "datacenters": [],
+      "description": "",
+      "id": "4e2800b2-e150-8196-3e12-902f96dfff15",
+      "name": "intentions-read",
+      "namespace": null,
+      "rules": "service_prefix \"\" {\n  policy = \"read\"\n}\n"
+    }
+  },
+  consul_acl_token.vault = {
+    "address": "consul_acl_token.vault",
+    "mode": "managed",
+    "type": "consul_acl_token",
+    "name": "vault",
+    "provider_name": "registry.terraform.io/hashicorp/consul",
+    "schema_version": 0,
+    "values": {
+      "accessor_id": "57db58e2-2e32-caab-bef7-8cb85a5cc026",
+      "description": "ACL token for Consul secrets engine in Vault",
+      "id": "57db58e2-2e32-caab-bef7-8cb85a5cc026",
+      "local": true,
+      "namespace": null,
+      "policies": [
+        "global-management"
+      ],
+      "roles": []
+    },
+    "depends_on": [
+      "data.consul_acl_policy.management"
+    ]
+  },
+  data.consul_acl_policy.management = {
+    "address": "data.consul_acl_policy.management",
+    "mode": "data",
+    "type": "consul_acl_policy",
+    "name": "management",
+    "provider_name": "registry.terraform.io/hashicorp/consul",
+    "schema_version": 0,
+    "values": {
+      "datacenters": [],
+      "description": "Builtin Policy that grants unlimited access",
+      "id": "00000000-0000-0000-0000-000000000001",
+      "name": "global-management",
+      "namespace": null,
+      "rules": "\nacl = \"write\"\nagent_prefix \"\" {\n\tpolicy = \"write\"\n}\nevent_prefix \"\" {\n\tpolicy = \"write\"\n}\nkey_prefix \"\" {\n\tpolicy = \"write\"\n}\nkeyring = \"write\"\nnode_prefix \"\" {\n\tpolicy = \"write\"\n}\noperator = \"write\"\nquery_prefix \"\" {\n\tpolicy = \"write\"\n}\nservice_prefix \"\" {\n\tpolicy = \"write\"\n\tintentions = \"write\"\n}\nsession_prefix \"\" {\n\tpolicy = \"write\"\n}"
+    }
+  },
+  {
+    "address": "data.consul_acl_token_secret_id.vault",
+    "mode": "data",
+    "type": "consul_acl_token_secret_id",
+    "name": "vault",
+    "provider_name": "registry.terraform.io/hashicorp/consul",
+    "schema_version": 0,
+    "values": {
+      "accessor_id": "57db58e2-2e32-caab-bef7-8cb85a5cc026",
+      "encrypted_secret_id": "",
+      "id": "57db58e2-2e32-caab-bef7-8cb85a5cc026",
+      "pgp_key": "",
+      "secret_id": "f905ca29-28de-c3be-d204-b4664eb827d6"
+    }
+  },
+  {
+    "address": "vault_consul_secret_backend.consul",
+    "mode": "managed",
+    "type": "vault_consul_secret_backend",
+    "name": "consul",
+    "provider_name": "registry.terraform.io/hashicorp/vault",
+    "schema_version": 0,
+    "values": {
+      "address": "consul:8500",
+      "default_lease_ttl_seconds": 3600,
+      "description": "Manages the Consul backend",
+      "id": "consul",
+      "max_lease_ttl_seconds": 3600,
+      "path": "consul",
+      "scheme": "http",
+      "token": "f905ca29-28de-c3be-d204-b4664eb827d6"
+    },
+    "depends_on": [
+      "data.consul_acl_token_secret_id.vault"
+    ]
+  },
+  {
+    "address": "vault_consul_secret_backend_role.app_team",
+    "mode": "managed",
+    "type": "vault_consul_secret_backend_role",
+    "name": "app_team",
+    "provider_name": "registry.terraform.io/hashicorp/vault",
+    "schema_version": 0,
+    "values": {
+      "backend": "consul",
+      "id": "consul/roles/app-team",
+      "local": false,
+      "max_ttl": 0,
+      "name": "app-team",
+      "path": null,
+      "policies": [
+        "intentions-read",
+        "key-read"
+      ],
+      "token_type": "client",
+      "ttl": 0
+    }
+  }

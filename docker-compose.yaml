@@ -1,0 +1,19 @@
+version: "3.8"
+    
+services:
+  consul:
+    image: consul:1.8.3
+    volumes:
+      - ./config:/config
+    ports:
+      - "8400:8400"
+      - "8500:8500"
+      - "8600:8600"
+      - "8600:8600/udp"
+    command: "agent -server -bootstrap-expect 1 -ui -client 0.0.0.0 -config-file /config/consul.hcl"
+  vault:
+    image: vault:1.5.2
+    ports:
+      - "8200:8200"
+    cap_add:
+      - IPC_LOCK

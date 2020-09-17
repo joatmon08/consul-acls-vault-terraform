@@ -1,0 +1,5 @@
+{
+  "mock": {
+    "tfstate": "../testdata/test.json"
+  }
+}

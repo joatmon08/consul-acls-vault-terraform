@@ -1,0 +1,15 @@
+import "tfplan/v2" as tfplan
+
+resources = values(tfplan.planned_values.resources)
+
+consul_acl_policies = filter resources as _, v { v.type is "consul_acl_policy" }
+
+consul_acl_policies_do_not_have_write_rule = rule {
+	all consul_acl_policies as consul_acl_policy {
+		consul_acl_policy.values.rules not contains "write"
+	}
+}
+
+main = rule {
+	consul_acl_policies_do_not_have_write_rule
+}

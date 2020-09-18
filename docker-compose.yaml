@@ -17,3 +17,22 @@ services:
       - "8200:8200"
     cap_add:
       - IPC_LOCK
+
+  consul_template:
+    image: hashicorp/consul-template:light
+    environment:
+      CONSUL_HTTP_ADDR: consul:8500
+      CT_LOCAL_CONFIG: |
+        template {
+          contents = <<EOH
+        {{ range ls "app" }}
+        {{ .Key }}={{ .Value }}{{ end }}
+        EOH
+          destination = "/tmp/app-values"
+          wait {
+            min = "2s"
+            max = "5s"
+          }
+        }
+    volumes:
+      - "./values:/tmp"
